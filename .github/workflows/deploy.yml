@@ -25,22 +25,3 @@ jobs:
       # Initialize Supabase
       - name: Initialize Supabase
         run: supabase init
-
-   
-
-      # Link to Supabase project and push database schema
-      - name: Link Project and Push Schema
-        run: |
-          supabase link --project-ref $PROJECT_ID
-          supabase db push
-
-      # Advanced Usage Example (Optional)
-      # Verify generated TypeScript types are up-to-date with Postgres schema
-      - name: Verify Generated TypeScript Types
-        run: |
-          supabase gen types typescript --local > schema.gen.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet schema.gen.ts; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff
-            exit 1
-          fi
