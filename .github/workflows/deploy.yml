@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      # Add more steps as needed
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -26,8 +25,48 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Supabase CLI Action
-        uses: supabase/setup-cli@v1.3.0
-        # You might need additional steps or configuration here
+      # Add any other build or test steps here
 
-      # Add deployment step or other steps following Supabase setup
+  setup-and-migrate-db:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Setup Supabase CLI with a specific version
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 'latest' # Using latest or specify like '1.136.3'
+      
+      # Initialize Supabase and start DB
+      - name: Initialize Supabase
+        run: supabase init
+      - name: Start DB and apply migrations
+        run: supabase db start
+
+      # Verify generated types match Postgres schema
+      - name: Verify generated types match Postgres schema
+        run: |
+          supabase gen types typescript --local > schema.gen.ts
+          if ! git diff --ignore-space-at-eol --exit-code --quiet schema.gen.ts; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff
+            exit 1
+          fi
+
+  release-schema-changes:
+    runs-on: ubuntu-latest
+    needs: setup-and-migrate-db
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }} # Ensure this is stored in your GitHub repo secrets
+    steps:
+      - uses: actions/checkout@v2
+
+      # Link to your Supabase project and push DB changes
+      - name: Link and Push DB changes to Supabase
+        run: |
+          supabase link --project-ref $PROJECT_ID
+          supabase db push
