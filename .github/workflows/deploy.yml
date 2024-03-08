@@ -26,9 +26,7 @@ jobs:
       - name: Initialize Supabase
         run: supabase init
 
-      # Start Supabase Database
-      - name: Start Supabase Database
-        run: supabase db start
+   
 
       # Link to Supabase project and push database schema
       - name: Link Project and Push Schema
