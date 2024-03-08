@@ -33,12 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      # Setup Supabase CLI with a specific version
+      # Setup Supabase CLI with the latest version
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
-        with:
-          version: 'latest' # Using latest or specify like '1.136.3'
-      
+
       # Initialize Supabase and start DB
       - name: Initialize Supabase
         run: supabase init
