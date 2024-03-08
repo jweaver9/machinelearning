@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.YOUR_SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }} # Updated to reflect the new secret name
       PROJECT_ID: ${{ secrets.YOUR_SUPABASE_PROJECT_ID }}
 
     steps:
