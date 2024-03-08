@@ -1,4 +1,4 @@
-name: Deploy Function
+name: Deploy Function and Push Schema Changes
 
 on:
   push:
@@ -7,23 +7,42 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  setup_and_deploy:
     runs-on: ubuntu-latest
-
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }} # Updated to reflect the new secret name
-      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }} # Make sure to replace <project-id> with your actual project ID
 
     steps:
+      # Setup Supabase CLI
       - uses: actions/checkout@v3
-
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Deploy Function to Supabase
-        run: supabase functions deploy --project-ref $PROJECT_ID
-        env:
-          SUPABASE_ACCESS_TOKEN: $SUPABASE_ACCESS_TOKEN
-          PROJECT_ID: $PROJECT_ID
+      # Initialize Supabase
+      - name: Initialize Supabase
+        run: supabase init
+
+      # Start Supabase Database
+      - name: Start Supabase Database
+        run: supabase db start
+
+      # Link to Supabase project and push database schema
+      - name: Link Project and Push Schema
+        run: |
+          supabase link --project-ref $PROJECT_ID
+          supabase db push
+
+      # Advanced Usage Example (Optional)
+      # Verify generated TypeScript types are up-to-date with Postgres schema
+      - name: Verify Generated TypeScript Types
+        run: |
+          supabase gen types typescript --local > schema.gen.ts
+          if ! git diff --ignore-space-at-eol --exit-code --quiet schema.gen.ts; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff
+            exit 1
+          fi
