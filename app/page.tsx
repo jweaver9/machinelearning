@@ -1,13 +1,11 @@
-// Page.tsx (Server Component)
+// Page.tsx or another component file
 import InteractivePart from './InteractivePart'; // Adjust the import path as necessary
 
-function Page() {
+export default function Page() {
     return (
-        <>
-            {/* Server-rendered components can go here */}
-            <InteractivePart /> {/* This will be client-side interactive */}
-        </>
+        <div>
+            {/* Other server-side or static components can go here */}
+            <InteractivePart />
+        </div>
     );
 }
-
-export default Page;
