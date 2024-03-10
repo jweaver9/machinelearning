@@ -1,7 +1,4 @@
-// InteractivePart.tsx (Client Component)
-// Add "use client" at the top of the file to mark this as a client component
-use client;
-
+// InteractivePart.tsx
 import { useState } from 'react';
 
 export default function InteractivePart() {
